@@ -1,0 +1,73 @@
+import { act, renderHook } from '@testing-library/react-hooks';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useProductStore } from '../src/store/useProductStore';
+
+// Mock AsyncStorage for test environment
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  setItem: jest.fn(() => Promise.resolve()),
+  getItem: jest.fn(() => Promise.resolve(null)),
+}));
+
+// Mock fetch globally
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    json: () =>
+      Promise.resolve([
+        { id: '1', name: 'Product 1', price: 100, image: '', description: '' },
+      ]),
+  }),
+) as jest.Mock;
+
+describe('useProductStore', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('toggles favorite correctly', async () => {
+    const { result } = renderHook(() => useProductStore());
+
+    await act(async () => {
+      await result.current.toggleFavorite('test-id');
+    });
+    expect(result.current.favorites).toContain('test-id');
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      'favorites',
+      JSON.stringify(['test-id']),
+    );
+
+    await act(async () => {
+      await result.current.toggleFavorite('test-id');
+    });
+    expect(result.current.favorites).not.toContain('test-id');
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      'favorites',
+      JSON.stringify([]),
+    );
+  });
+
+  it('fetches products correctly', async () => {
+    const { result } = renderHook(() => useProductStore());
+
+    await act(async () => {
+      await result.current.fetchProducts();
+    });
+
+    expect(fetch).toHaveBeenCalled();
+    expect(result.current.products.length).toBeGreaterThan(0);
+    expect(result.current.loading).toBe(false);
+  });
+
+  it('loads favorites correctly', async () => {
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+      JSON.stringify(['123']),
+    );
+    const { result } = renderHook(() => useProductStore());
+
+    await act(async () => {
+      await result.current.loadFavorites();
+    });
+
+    expect(AsyncStorage.getItem).toHaveBeenCalledWith('favorites');
+    expect(result.current.favorites).toContain('123');
+  });
+});

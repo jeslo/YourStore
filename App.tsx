@@ -1,45 +1,111 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+// Import necessary types
+import React from 'react';
+import { Text } from 'react-native';
 import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+  NavigationContainer,
+  NavigatorScreenParams,
+} from '@react-navigation/native';
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationProp,
+} from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import colors from './src/theme/colors';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+import ProductListScreen from './src/screens/ProductListScreen';
+import ProductDetailsScreen from './src/screens/ProductDetailsScreen';
+import FavoritesScreen from './src/screens/FavoritesScreen';
 
+export type TabParamList = {
+  Products: undefined;
+  Favorites: undefined;
+};
+
+export type RootStackParamList = {
+  Home: NavigatorScreenParams<TabParamList>;
+  ProductDetails: { productId: string };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
+
+function MainTabs() {
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textBlack,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: { fontSize: 14, fontWeight: '500', paddingBottom: 4 },
+        tabBarStyle: {
+          backgroundColor: colors.textWhite,
+          borderTopLeftRadius: 18,
+          borderTopRightRadius: 18,
+          height: 64,
+        },
+        tabBarIcon: ({ focused, color, size }) => {
+          if (route.name === 'Products') {
+            return (
+              <Icon
+                name="view-grid"
+                size={28}
+                color={focused ? colors.primary : colors.textBlack}
+                style={{ marginBottom: 2 }}
+              />
+            );
+          }
+          if (route.name === 'Favorites') {
+            return (
+              <Icon
+                name={focused ? 'heart' : 'heart-outline'}
+                size={28}
+                color={focused ? colors.primary : colors.textBlack}
+                style={{ marginBottom: 2 }}
+              />
+            );
+          }
+          return null;
+        },
+      })}
+    >
+      <Tab.Screen name="Products" component={ProductListScreen} />
+      <Tab.Screen name="Favorites" component={FavoritesScreen} />
+    </Tab.Navigator>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+const linking = {
+  prefixes: ['YourStore://'],
+  config: {
+    screens: {
+      Home: {
+        screens: {
+          Products: 'products',
+          Favorites: 'favorites',
+        },
+      },
+      ProductDetails: 'product/:productId',
+    },
   },
-});
+};
 
-export default App;
+export default function App() {
+  return (
+    <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Home"
+          component={MainTabs}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ProductDetails"
+          component={ProductDetailsScreen}
+          options={{ title: 'Product Details' }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
