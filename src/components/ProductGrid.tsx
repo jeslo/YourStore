@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import ProductCard from './ProductCard';
 import type { Product } from '../types';
-import colors from '../theme/colors';
 
 type Props = {
   products: Product[];

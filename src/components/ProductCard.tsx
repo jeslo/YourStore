@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import colors from '../theme/colors';
 import { useProductStore } from '../store/useProductStore';
 import type { Product } from '../types';

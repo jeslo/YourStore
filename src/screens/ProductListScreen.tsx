@@ -97,7 +97,14 @@ export default function ProductListScreen() {
         </View>
 
         {error ? (
-          <View style={{ margin: 24, alignItems: 'center' }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              margin: 24,
+            }}
+          >
             <Text style={{ color: colors.error, fontSize: 16 }}>{error}</Text>
             <TouchableOpacity onPress={fetchProducts} style={{ marginTop: 12 }}>
               <Text style={{ color: colors.primary }}>Retry</Text>
