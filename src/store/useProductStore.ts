@@ -24,7 +24,7 @@ export const useProductStore = create<StoreState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const res = await fetch(
-        'https://mocki.io/v1/c53fb45e-5085-487a-afac-0295f62fb86e',
+        'https://mocki.io/v1/5e38024a-a5cd-460d-b429-4c6811e33a52',
       );
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
